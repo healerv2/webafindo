@@ -52,12 +52,12 @@
                     <!-- Nav tabs -->
                     <ul class="nav nav-tabs nav-tabs-custom" role="tablist">
                         <li class="nav-item">
-                            <a class="nav-link active pb-3 pt-0" data-bs-toggle="tab" href="#data-paket" role="tab"><i
-                                    class="fab fa-product-hunt me-2"></i>Data Paket</a>
+                            <a class="nav-link {{ set_active('profile.index') }} pb-3 pt-0" data-bs-toggle="tab"
+                                href="#data-paket" role="tab"><i class="fab fa-product-hunt me-2"></i>Data Paket</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link pb-3 pt-0" data-bs-toggle="tab" href="#activity" role="tab"><i
-                                    class="fas fa-suitcase me-2"></i>Activity</a>
+                            <a class="nav-link pb-3 pt-0" data-bs-toggle="tab" href="#area" role="tab"><i
+                                    class="fas fa-suitcase me-2"></i>Area</a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link pb-3 pt-0" data-bs-toggle="tab" href="#settings" role="tab"><i
@@ -67,7 +67,7 @@
 
                     <!-- Tab panes -->
                     <div class="tab-content pt-4">
-                        <div class="tab-pane active" id="data-paket" role="tabpanel">
+                        <div class="tab-pane {{ set_active('profile.index') }}" id="data-paket" role="tabpanel">
                             <div class="row">
                                 <div class="col-xl-12">
                                     <div class="card">
@@ -174,7 +174,7 @@
                         </div>
                         <!-- end modal -->
 
-                        <div class="tab-pane" id="activity" role="tabpanel">
+                        <div class="tab-pane" id="area" role="tabpanel">
                         </div>
 
                         <div class="tab-pane" id="settings" role="tabpanel">
@@ -280,24 +280,6 @@
                             });
                         }
                     }
-                    // success: function(response) {
-                    //     if (response.status == 400) {
-                    //         $.each(response.errors, function(key, err_value) {
-                    //             $('.' + key + '_error').text(err_value[0]);
-                    //         });
-                    //     } else {
-                    //         $('#addModal').modal('hide');
-                    //         $('#addDataPaketForm')[0].reset();
-                    //         table.ajax.reload();
-
-                    //         Swal.fire({
-                    //             icon: 'success',
-                    //             title: 'Berhasil!',
-                    //             text: response.message,
-                    //             timer: 1000
-                    //         });
-                    //     }
-                    // }
                 });
             });
 

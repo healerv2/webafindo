@@ -71,7 +71,7 @@ class DataPaketController extends Controller
             $findLayanan = DataPaket::where('nama_paket', $request->nama_paket)->first();
             if ($findLayanan != null) {
                 return response()->json([
-                    'success' => 400,
+                    'success' => 409,
                     'message' => 'Data Paket sudah tersimpan!'
                 ]);
             }
@@ -89,9 +89,8 @@ class DataPaketController extends Controller
         } catch (\Throwable $th) {
             return response()->json([
                 'success' => 400,
-                'message' => 'Terjadi kesalahan sistem. code 500'
+                'message' => 'Data Paket tidak ditemukan'
             ]);
-            //return redirect()->back()->with('error', 'Terjadi kesalahan sistem. code 500');
         }
     }
 
@@ -155,12 +154,11 @@ class DataPaketController extends Controller
     {
         //
         try {
-            //$ID = decrypt($id);
             $layanan = DataPaket::findOrFail($id);
             $layanan->delete();
             return response()->json([
                 'status' => 200,
-                'message' => 'Data Paket berhasil dihapus!'
+                'message' => 'Data Paket berhasil dihapus'
             ]);
         } catch (\Throwable $th) {
             return response()->json([

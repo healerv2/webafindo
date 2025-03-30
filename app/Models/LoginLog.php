@@ -4,14 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Area extends Model
+class LoginLog extends Model
 {
     //
-    protected $table = 'areas';
+    protected $table = 'login_logs';
     protected $primaryKey = 'id';
     protected $guarded = [];
     protected $casts = [
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];
+
+    public function mikrotik()
+    {
+        return $this->belongsTo(Mikrotik::class);
+    }
 }

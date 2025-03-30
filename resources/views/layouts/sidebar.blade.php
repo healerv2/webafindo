@@ -34,7 +34,7 @@
                         </a>
                     </li>
                 @endcan
-                @can('view user')
+                @can('view manage pelanggan')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="mdi mdi-account-box-multiple-outline"></i>
@@ -42,7 +42,9 @@
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
                             <li><a href="#">Pelanggan</a></li>
-                            <li><a href="#">My Mikrotik</a></li>
+                            @can('view mikrotik')
+                                <li><a href="{{ route('mikrotik.index') }}">My Mikrotik</a></li>
+                            @endcan
                             <li><a href="#">Cek Mikrotik</a></li>
                             <li><a href="#">Cek PPOE</a></li>
                             <li><a href="#">Ekport</a></li>

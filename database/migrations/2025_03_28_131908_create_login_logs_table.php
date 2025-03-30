@@ -11,9 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('areas', function (Blueprint $table) {
+        Schema::create('login_logs', function (Blueprint $table) {
             $table->id();
-            $table->string('nama_area');
+            $table->foreignId('mikrotik_id')->constrained()->onDelete('cascade');
+            $table->string('username');
+            $table->string('ip_address');
+            $table->dateTime('login_time');
+            $table->boolean('success');
+            $table->json('details')->nullable();
             $table->timestamps();
         });
     }
@@ -23,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('areas');
+        Schema::dropIfExists('login_logs');
     }
 };

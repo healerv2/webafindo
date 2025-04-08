@@ -82,7 +82,7 @@ class AreaController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'success' => 400,
+                'success' => 404,
                 'message' => 'Data Paket tidak ditemukan'
             ]);
         }

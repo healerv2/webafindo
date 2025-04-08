@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Models\User;
+use App\Models\UserDetail;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
 {
@@ -89,6 +91,10 @@ class UserController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make('P@5SW0rD'),
                 'foto'      => 'user.jpg',
+            ]);
+
+            UserDetail::create([
+                'user_id' => $user->id,
             ]);
 
             $user->syncRoles($request->roles);

@@ -12,6 +12,7 @@ use App\Http\Controllers\{
     DataPaketController,
     AreaController,
     MikrotikController,
+    CustomerController,
 };
 
 Route::get('/', function () {
@@ -33,7 +34,6 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::resource('/users', UserController::class);
         //Users
         Route::resource('/profile', ProfileController::class);
-        // Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
         Route::post('/profile/update/profile', [ProfileController::class, 'updateProfile'])->name('profile.update_profile');
         Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.password_update');
         //Data paket
@@ -42,5 +42,9 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::resource('/data-area', AreaController::class);
         //Mikrotik
         Route::resource('/mikrotik', MikrotikController::class);
+        //Customer
+        Route::resource('/customer', CustomerController::class);
+        //Tagihan
+        Route::get('/get-tagihan/customer/{id}', [CustomerController::class, 'getTagihan'])->name('customer.get_tagihan');
     });
 });

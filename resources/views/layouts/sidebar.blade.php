@@ -41,7 +41,9 @@
                             <span>Manage Pelanggan</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="#">Pelanggan</a></li>
+                            @can('view customer')
+                                <li><a href="{{ route('customer.index') }}">Pelanggan</a></li>
+                            @endcan
                             @can('view mikrotik')
                                 <li><a href="{{ route('mikrotik.index') }}">My Mikrotik</a></li>
                             @endcan

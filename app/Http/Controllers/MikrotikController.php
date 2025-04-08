@@ -138,8 +138,8 @@ class MikrotikController extends Controller
             ]);
         } catch (\Throwable $th) {
             return response()->json([
-                'success' => '404',
-                'message' => 'Mikrotik tidak ditemukan'
+                'success' => '500',
+                'message' => 'Maximum execution time of 30 seconds exceeded'
             ]);
         }
     }

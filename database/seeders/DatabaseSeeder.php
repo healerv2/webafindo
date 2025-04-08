@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             UserRolePermissionSeeder::class,
             SettingsSeeder::class,
+            AreaSeeder::class,
+            PaketSeeder::class
         ]);
     }
 }

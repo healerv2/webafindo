@@ -111,6 +111,10 @@
     <script src="//cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
     <script src="//cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
 
+    <script src="{{ asset('assets/libs/tippy.js/tippy.all.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/tooltipster.init.js') }}"></script>
+
+
     <!-- Validator -->
     <script src="{{ asset('js/validator.min.js') }}"></script>
 

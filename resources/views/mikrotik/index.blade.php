@@ -265,7 +265,7 @@
                     type: "POST",
                     data: $(this).serialize(),
                     success: function(response) {
-                        if (response.status == 404) {
+                        if (response.status == 409) {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Oops...',
@@ -288,18 +288,21 @@
                         }
                     },
                     error: function(xhr) {
-                        // Cek jika error karena data duplikat
-                        if (xhr.status === 409) {
+                        // Cek jika error 500
+                        if (xhr.status == 500) {
+                            const response = JSON.parse(xhr.responseText);
                             Swal.fire({
-                                title: 'Data Duplikat!',
+                                icon: 'error',
+                                title: 'Oops...',
                                 text: response.message,
-                                icon: 'warning'
+                                showConfirmButton: true,
+                                timer: 1500
                             });
                         } else {
                             Swal.fire({
                                 icon: 'error',
                                 title: 'Error!',
-                                text: response.message,
+                                text: message,
                                 showConfirmButton: true,
                                 timer: 1500
                             });

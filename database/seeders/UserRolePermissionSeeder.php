@@ -50,11 +50,16 @@ class UserRolePermissionSeeder extends Seeder
         Permission::create(['name' => 'update mikrotik']);
         Permission::create(['name' => 'delete mikrotik']);
 
+        Permission::create(['name' => 'view customer']);
+        Permission::create(['name' => 'create customer']);
+        Permission::create(['name' => 'update customer']);
+        Permission::create(['name' => 'delete customer']);
+
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin
         $adminRole = Role::create(['name' => 'admin']);
-        $staffRole = Role::create(['name' => 'staff']);
-        $userRole = Role::create(['name' => 'user']);
+        $staffRole = Role::create(['name' => 'Customer']);
+        //$userRole = Role::create(['name' => 'Customer']);
 
         // Lets give all permission to super-admin role.
         $allPermissionNames = Permission::pluck('name')->toArray();

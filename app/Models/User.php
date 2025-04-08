@@ -10,6 +10,7 @@ use Laravel\Fortify\TwoFactorAuthenticatable;
 use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class User extends Authenticatable
 {
@@ -31,6 +32,8 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'status_users',
+        'foto'
     ];
 
     /**
@@ -66,4 +69,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function user_detail(): HasOne
+    {
+        return $this->hasOne(UserDetail::class);
+    }
+
+    // public function area(): HasOne
+    // {
+    //     return $this->hasOne(Area::class);
+    // }
 }

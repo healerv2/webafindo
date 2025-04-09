@@ -19,7 +19,8 @@ class DatabaseSeeder extends Seeder
             UserRolePermissionSeeder::class,
             SettingsSeeder::class,
             AreaSeeder::class,
-            PaketSeeder::class
+            PaketSeeder::class,
+            MikrotikSeeder::class
         ]);
     }
 }

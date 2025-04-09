@@ -18,6 +18,8 @@ use App\Http\Controllers\{
 Route::get('/', function () {
     return redirect()->route('login');
 });
+//Callback Xendit
+Route::post('/payment/xendit/callback', [CustomerController::class, 'handleCallback'])->name('xendit.callback');
 
 Route::group(['middleware' => ['auth',]], function () {
     Route::get('dashboard', [DashboardController::class, 'index'])->name('dashboard');
@@ -46,5 +48,8 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::resource('/customer', CustomerController::class);
         //Tagihan
         Route::get('/get-tagihan/customer/{id}', [CustomerController::class, 'getTagihan'])->name('customer.get_tagihan');
+        Route::post('/pay-tunai-tagihan/customer/{id}', [CustomerController::class, 'payTunaiTagihan'])->name('customer.pay_tunai_tagihan');
+        Route::post('/pay-xendit-tagihan/customer', [CustomerController::class, 'payTagihanXendit'])->name('customer.pay_xendit_tagihan');
+        Route::get('/get-pembayaran/customer', [CustomerController::class, 'viewHistoryPembayaranAdmin'])->name('customer.get_pembayaran_admin');
     });
 });

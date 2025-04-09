@@ -52,22 +52,26 @@
                                                 </tr>
                                             </tbody>
                                         </table>
+                                        <input type="hidden" id="edit_customer_id">
+                                        <input type="hidden" name="layanan" id="edit_customer_harga_paket">
+                                        <input type="hidden" name="paket"
+                                            value="{{ $customer->user_detail->paket->nama_paket }}">
                                         <div class="mb-3">
                                             <label for="paket_id" class="form-label">Bulan</label>
                                             <select name="bulan" id="edit_customer_paket" class="form-control" required>
                                                 <option value="">Pilih Bulan</option>
-                                                <option value="1">Januari</option>
-                                                <option value="2">Februari</option>
-                                                <option value="3">Maret</option>
-                                                <option value="4">April</option>
-                                                <option value="5">Mei</option>
-                                                <option value="6">Juni</option>
-                                                <option value="7">Juli</option>
-                                                <option value="8">Agustus</option>
-                                                <option value="9">September</option>
-                                                <option value="10">Oktober</option>
-                                                <option value="11">November</option>
-                                                <option value="12">Desember</option>
+                                                <option value="Januari">Januari</option>
+                                                <option value="Februari">Februari</option>
+                                                <option value="Maret">Maret</option>
+                                                <option value="April">April</option>
+                                                <option value="Mei">Mei</option>
+                                                <option value="Juni">Juni</option>
+                                                <option value="Juli">Juli</option>
+                                                <option value="Agustus">Agustus</option>
+                                                <option value="September">September</option>
+                                                <option value="Oktober">Oktober</option>
+                                                <option value="November">November</option>
+                                                <option value="Desember">Desember</option>
                                             </select>
                                             <span class="error name_error"></span>
                                         </div>
@@ -101,14 +105,43 @@
                                                     name="by_tambahan_2" placeholder="Biaya Tambahan 2">
                                             </div>
                                         </div>
+                                        <div class="mb-3">
+                                            <label for="tarif" class="form-label">Total Pembayaran</label>
+                                            <input type="number" class="form-control" id="tarif" name="tarif"
+                                                readonly>
+                                            <span class="error name_error"></span>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-light waves-effect"
+                                            data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary waves-effect waves-light">Bayar
+                                            Tunai</button>
+                                        <a class="btn btn-success waves-effect waves-light" href="#"
+                                            onclick="$('#pay-xendit').submit()">Bayar
+                                            Online</a>
                                     </div>
                                 </form>
-                                <div class="modal-footer">
-                                    <button type="button" class="btn btn-light waves-effect"
-                                        data-bs-dismiss="modal">Close</button>
-                                    <button type="button" class="btn btn-primary waves-effect waves-light">Save
-                                        changes</button>
-                                </div>
+                                <form action="{{ route('customer.pay_xendit_tagihan') }}" method="post" id="pay-xendit"
+                                    style="display: none;">
+                                    @csrf
+                                    <input type="hidden" value="{{ $customer->user_detail->user->id }}" name="id">
+                                    <input type="hidden" name="paket"
+                                        value="{{ $customer->user_detail->paket->nama_paket }}">
+                                    <input type="hidden" name="name" value="{{ $customer->name }}">
+                                    <input type="hidden" name="email" value="{{ $customer->email }}">
+                                    <input type="hidden" name="nohp" value="{{ $customer->user_detail->nohp }}">
+                                    <input type="hidden" id="edit_customer_harga_paket" name="harga_paket"
+                                        value="{{ old('harga_paket', $customer->user_detail->paket->harga_paket ?? 0) }}">
+                                    <input type="hidden" id="edit_customer_by_tambahan_1" name="by_tambahan_1"
+                                        value="{{ old('by_tambahan_1', $customer->user_detail->by_tambahan_1 ?? 0) }}">
+                                    <input type="hidden" id="edit_customer_by_tambahan_2" name="by_tambahan_2"
+                                        value="{{ old('by_tambahan_2', $customer->user_detail->by_tambahan_2 ?? 0) }}">
+                                    <input type="hidden" id="edit_customer_diskon" name="diskon"
+                                        value="{{ old('diskon', $customer->user_detail->diskon ?? 0) }}">
+                                    <input type="hidden" id="tarif" name="tarif"
+                                        value="{{ old('tarif', $customer->user_detail->total ?? 0) }}">
+                                </form>
                             </div>
                             <!-- /.modal-content -->
                         </div>
@@ -207,6 +240,33 @@
         <!-- end col -->
     </div>
     <!--end row-->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-body">
+
+                    <h5 class="card-title">History Pembayaran</h5>
+                    <p class="card-title-desc">
+                    </p>
+                    <div class="table-responsive">
+                        <table class="table table-bordered" id="table1">
+                            <thead>
+                                <th>No</th>
+                                <th>Tagihan Bulan</th>
+                                <th>Paket</th>
+                                <th>Tarif</th>
+                                <th>Admin</th>
+                                <th>Isolir</th>
+                                <th width="15%"><i class="fa fa-cog"></i></th>
+                            </thead>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- end col -->
+    </div>
+    <!-- end row -->
 @endsection
 @push('scripts')
     <script>
@@ -241,29 +301,26 @@
                 processing: true,
                 serverSide: true,
                 autoWidth: false,
-                ajax: "{{ route('customer.index') }}",
+                ajax: "{{ route('customer.get_pembayaran_admin') }}",
                 columns: [{
                         data: 'DT_RowIndex',
                         searchable: false,
                         sortable: false
                     },
                     {
-                        data: 'Nama'
+                        data: 'tagihan'
                     },
                     {
-                        data: 'user_detail.mikrotik.name'
+                        data: 'paket'
                     },
                     {
-                        data: 'user_detail.paket.nama_paket'
+                        data: 'tarif'
                     },
                     {
-                        data: 'user_detail.area.nama_area'
+                        data: 'admin.name'
                     },
                     {
-                        data: 'total'
-                    },
-                    {
-                        data: 'created_at'
+                        data: 'isolir'
                     },
                     {
                         data: 'aksi',
@@ -306,6 +363,8 @@
                                 .area_id);
                             $('#edit_customer_paket').val(response.customer.user_detail
                                 .paket_id);
+                            $('#edit_customer_harga_paket').val(response.customer.user_detail
+                                .harga_paket);
                             $('#edit_customer_nohp').val(response.customer.user_detail.nohp);
                             $('#edit_customer_tanggal_tagihan').val(response.customer
                                 .user_detail.tanggal_tagihan);
@@ -319,14 +378,6 @@
                                 .user_detail.by_tambahan_2);
                             $('#edit_customer_diskon').val(response.customer.user_detail
                                 .diskon);
-                            $('#edit_customer_alamat').val(response.customer.user_detail
-                                .alamat);
-                            $('#edit_customer_latitude').val(response.customer.user_detail
-                                .latitude);
-                            $('#edit_customer_longitude').val(response.customer.user_detail
-                                .longitude);
-                            $('#edit_customer_perangkat').val(response.customer.user_detail
-                                .perangkat);
                             $('#getTagihanModal').modal('show');
                         }
                     }
@@ -339,8 +390,8 @@
                 var id = $('#edit_customer_id').val();
 
                 $.ajax({
-                    url: "/dashboard/customer/" + id,
-                    type: "PUT",
+                    url: "/dashboard/pay-tunai-tagihan/customer/" + id,
+                    type: "POST",
                     data: $(this).serialize(),
                     success: function(response) {
                         if (response.status == 404) {
@@ -367,6 +418,86 @@
                         }
                     }
                 });
+            });
+
+            //Perhitungan
+            // Inisialisasi nilai awal
+            $("#edit_customer_harga_paket").val({{ $customer->user_detail->paket->harga_paket }});
+            $("#edit_customer_by_tambahan_1").val({{ $customer->user_detail->by_tambahan_1 }});
+            $("#edit_customer_by_tambahan_2").val({{ $customer->user_detail->by_tambahan_2 }});
+            $("#edit_customer_diskon").val({{ $customer->user_detail->diskon }});
+
+            // Simpan nilai awal harga paket untuk referensi
+            var initialHargaPaket = {{ $customer->user_detail->paket->harga_paket }};
+
+            // Fungsi untuk menghitung dan memperbarui nilai tarif
+            function hitungTarif() {
+                // Cek jika nilai layanan telah berubah menjadi 0 atau kosong dan kembalikan ke nilai awal jika perlu
+                if ($("#edit_customer_harga_paket").val() === "" || $("#edit_customer_harga_paket").val() === "0") {
+                    $("#edit_customer_harga_paket").val(initialHargaPaket);
+                }
+
+                // Parse semua nilai input sebagai angka
+                var layanan = parseInt($("#edit_customer_harga_paket").val()) || initialHargaPaket;
+                var biaya1 = parseInt($("#edit_customer_by_tambahan_1").val()) || 0;
+                var biaya2 = parseInt($("#edit_customer_by_tambahan_2").val()) || 0;
+                var diskon = parseInt($("#edit_customer_diskon").val()) || 0;
+
+                // console.log("Nilai input:", {
+                //     layanan,
+                //     biaya1,
+                //     biaya2,
+                //     diskon
+                // });
+
+                // Pastikan semua nilai terhitung dengan benar dalam total
+                var totalBiaya = layanan + biaya1 + biaya2;
+                //console.log("Total biaya sebelum diskon:", totalBiaya);
+
+                // Kurangi diskon dari total
+                var nilaiAkhir = totalBiaya - diskon;
+
+                // Pastikan hasil tidak negatif
+                if (nilaiAkhir < 0) {
+                    nilaiAkhir = 0;
+                }
+
+                //console.log("Nilai akhir setelah diskon:", nilaiAkhir);
+
+                // Tampilkan hasil di field tarif
+                $("#tarif").val(nilaiAkhir);
+            }
+
+            // Jalankan perhitungan awal saat dokumen siap
+            $(document).ready(function() {
+                hitungTarif();
+            });
+
+            // Event handler untuk field biaya tambahan dan diskon
+            $("#edit_customer_by_tambahan_1, #edit_customer_by_tambahan_2, #edit_customer_diskon").on(
+                'input change blur',
+                function() {
+                    // Pastikan nilai layanan tidak hilang
+                    if ($("#edit_customer_harga_paket").val() === "" || $("#edit_customer_harga_paket")
+                        .val() === "0") {
+                        $("#edit_customer_harga_paket").val(initialHargaPaket);
+                    }
+                    hitungTarif();
+                });
+
+            // Event handler khusus untuk harga paket
+            $("#edit_customer_harga_paket").on('input change blur', function() {
+                // Update nilai awal jika pengguna mengubahnya secara manual
+                var newValue = parseInt($(this).val()) || 0;
+                if (newValue > 0) {
+                    initialHargaPaket = newValue;
+                }
+                hitungTarif();
+            });
+
+            // Pastikan field tarif menampilkan nilai yang benar saat mendapat fokus
+            $("#tarif").on('focus', function() {
+                hitungTarif();
             });
         });
     </script>

@@ -436,9 +436,6 @@
                                 text: response.message
                             });
                         } else {
-                            // $('#addModal').modal('hide');
-                            // $('body').removeClass('modal-open');
-                            // $('.modal-backdrop').remove();
                             resetModalState();
                             $('#addDataPaketForm')[0].reset();
                             table.ajax.reload();

@@ -9,12 +9,27 @@ use App\Models\UserDetail;
 use App\Models\Mikrotik;
 use App\Models\Area;
 use App\Models\DataPaket;
-use Spatie\Permission\Models\Role;
+use App\Models\Tagihan;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Carbon\Carbon;
+use Ramsey\Uuid\Uuid;
+use Xendit\Invoice\CreateInvoiceRequest;
+use Xendit\Invoice\InvoiceApi;
+use Xendit\Configuration;
+use Illuminate\Support\Facades\Response;
+
 
 class CustomerController extends Controller
 {
+    private $xenditInvoiceApi;
+
+    public function __construct()
+    {
+        Configuration::setXenditKey(config('xendit.secret_key'));
+        $this->xenditInvoiceApi = new InvoiceApi();
+    }
+
     /**
      * Display a listing of the resource.
      */
@@ -304,6 +319,199 @@ class CustomerController extends Controller
                 'status' => 404,
                 'message' => 'Data customer tidak ditemukan'
             ]);
+        }
+    }
+
+    public function payTunaiTagihan(Request $request)
+    {
+        try {
+            $find = UserDetail::where('user_id', $request->id)->first();
+            if ($find == null) {
+                return response()->json([
+                    'status' => 404,
+                    'message' => 'Customer tidak ditemukan'
+                ]);
+            }
+
+            $transaksi =  UserDetail::where('user_id', $request->id)->first();
+
+            //dd($transaksi);
+
+            $transaksi->update([
+                'by_tambahan_1' =>  $request->by_tambahan_1,
+                'by_tambahan_2' =>  $request->by_tambahan_2,
+                'diskon' =>  $request->diskon,
+                'total' =>  $request->tarif,
+                //'no_ref' => Uuid::uuid4(),
+                'updated_at' => Carbon::now(),
+                // 'tanggal_bayar' => Carbon::now()
+            ]);
+
+            Tagihan::create([
+                'user_id' => $request->id,
+                'no_invoice' => Uuid::uuid4(),
+                'periode_tagihan' => $request->layanan_id,
+                'paket' => $request->paket,
+                'tarif' => $request->tarif,
+                'admin' => auth()->id(),
+                'status' => 'PAID',
+                'note' => 'Pembayaran Tunai',
+
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'pembayaran tunai berhasil!',
+                //'data' =>  $transaksi
+
+            ]);
+        } catch (\Throwable $e) {
+            // return response()->json([
+            //     'status' => 500,
+            //     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            // ], 500);
+            return response()->json([
+                'status' => 500,
+                'message' => 'Terjadi kesalahan sistem. 500'
+            ]);
+        }
+    }
+
+    public function payTagihanXendit(Request $request)
+    {
+
+        $find = UserDetail::where('user_id', $request->id)->first();
+        if ($find == null) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'Customer tidak ditemukan'
+            ]);
+        }
+
+        $transaksi =  UserDetail::where('user_id', $request->id)->first();
+        //dd($transaksi);
+
+        $transaksi->update([
+            'by_tambahan_1' =>  $request->by_tambahan_1,
+            'by_tambahan_2' =>  $request->by_tambahan_2,
+            'diskon' =>  $request->diskon,
+            'total' =>  $request->tarif,
+            //'no_ref' => Uuid::uuid4(),
+            'updated_at' => Carbon::now(),
+            // 'tanggal_bayar' => Carbon::now()
+        ]);
+
+        $apiInstance = new InvoiceApi();
+        $invoice =  new CreateInvoiceRequest([
+            'external_id' => (string) Uuid::uuid4(),
+            'amount' => $request->tarif,
+            'invoice_duration' => 86400,
+            'customer' => [
+                'given_names' => $request->name,
+                'email' => $request->email,
+                'mobile_number' => $request->nohp,
+            ],
+            'success_redirect_url' => route('dashboard'),
+            'failure_redirect_url' => route('dashboard'),
+        ]);
+
+        try {
+            $result = $apiInstance->createInvoice($invoice);
+            Tagihan::create([
+                'user_id' => $request->id,
+                'no_invoice' => $invoice['external_id'],
+                'periode_tagihan' => $request->layanan_id,
+                'paket' => $request->paket,
+                'tarif' => $invoice['amount'],
+                'invoice_url' => $result['invoice_url'],
+                'admin' => auth()->id(),
+                'status' => 'UNPAID',
+                'note' => 'Pembayaran Dengan Xendit',
+
+            ]);
+
+            return redirect($result['invoice_url']);
+            //print_r($result);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => 500,
+                'message' => 'Terjadi kesalahan sistem. 500'
+            ]);
+        }
+        // } catch (\Xendit\XenditSdkException $e) {
+        //     echo 'Exception when calling InvoiceApi->createInvoice: ', $e->getMessage(), PHP_EOL;
+        //     echo 'Full Error: ', json_encode($e->getFullError()), PHP_EOL;
+        // }
+    }
+
+    public function handleCallback(Request $request)
+    {
+        // Verifikasi callback token
+        $callbackToken = $request->header('X-CALLBACK-TOKEN');
+        if ($callbackToken !== config('xendit.callback_token')) {
+            return response()->json(['error' => 'Invalid callback token'], 403);
+        }
+
+        $payload = $request->all();
+
+        // Proses callback berdasarkan status
+        switch ($payload['status']) {
+            case 'PAID':
+                // Update status pembayaran di database
+                Tagihan::where('no_invoice', $payload['external_id'])->update(['status' => 'PAID']);
+                break;
+            case 'EXPIRED':
+                Tagihan::where('no_invoice', $payload['external_id'])->update(['status' => 'EXPIRED']);
+                break;
+            default:
+                return Response::json([
+                    'status' => 500,
+                    'message' => 'Terjadi kesalahan sistem. 500'
+                ]);
+                //break;
+        }
+
+        return response()->json([
+            'status' => 200,
+            'message' => 'callback berhasil!',
+        ]);
+    }
+
+    public function viewHistoryPembayaranAdmin(Request $request)
+    {
+        //
+        if ($request->ajax()) {
+            $data =  Tagihan::with('user', 'admin')->orderBy('id', 'desc')->get();
+            $user = auth()->user();
+            return datatables()
+                ->of($data)
+                ->addIndexColumn()
+                ->addColumn('tagihan', function ($data) {
+                    $tanggal_tagihan = $data->periode_tagihan;
+                    $tanggal_bayar = tanggal_indonesia($data->created_at, false) ?? 'Data belum lengkap';
+
+                    return '
+                        <a href="javascript:void(0)" class="text-info">
+                           ' . $tanggal_tagihan . '
+                        </a>
+                        <br>
+                        ' . $tanggal_bayar . '
+                    ';
+                })
+                ->addColumn('tarif', function ($data) {
+                    return  'Rp. ' . format_uang($data->tarif ?? 0);
+                })
+                ->addColumn('aksi', function ($row) use ($user) {
+                    $btn = '';
+                    if ($user->can("update customer")) {
+                        $btn = '<button type="button" data-id="' . $row->id . '" class="edit-customer btn btn-primary btn-sm"><i class="fas fa-eye"></i></button>';
+                    }
+                    $btn = $btn . '</div>';
+                    return $btn;
+                })
+
+                ->rawColumns(['aksi', 'tagihan'])
+                ->make(true);
         }
     }
 }

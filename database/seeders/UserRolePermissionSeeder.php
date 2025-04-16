@@ -56,6 +56,11 @@ class UserRolePermissionSeeder extends Seeder
         Permission::create(['name' => 'update customer']);
         Permission::create(['name' => 'delete customer']);
 
+        Permission::create(['name' => 'view tugas teknisi']);
+        Permission::create(['name' => 'create tugas teknisi']);
+        Permission::create(['name' => 'update tugas teknisi']);
+        Permission::create(['name' => 'delete tugas teknisi']);
+
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin
         $adminRole = Role::create(['name' => 'Teknisi']);

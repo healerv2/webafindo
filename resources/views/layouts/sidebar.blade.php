@@ -27,13 +27,13 @@
                         </a>
                     </li>
                 @endcan
-                @can('view user')
+                {{-- @can('view user')
                     <li class="{{ request()->is('dashboard/users*') ? 'active' : '' }}">
                         <a href="{{ route('users.index') }}" class="waves-effect">
                             <i class="mdi mdi-account-box-multiple-outline"></i> <span>User</span>
                         </a>
                     </li>
-                @endcan
+                @endcan --}}
                 @can('view manage pelanggan')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -53,16 +53,25 @@
                         </ul>
                     </li>
                 @endcan
-                @can('view user')
+                @can('view manage karyawan')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
                             <i class="mdi mdi-account-box-multiple-outline"></i>
                             <span>Manage Karyawan</span>
                         </a>
                         <ul class="sub-menu" aria-expanded="false">
-                            <li><a href="#">Tugas Teknisi</a></li>
+                            @can('view tugas teknisi')
+                                <li><a href="{{ route('tugas-teknisi.index') }}">Tugas Teknisi</a></li>
+                            @endcan
                             <li><a href="#">Absensi</a></li>
-                            <li><a href="#">Admin</a></li>
+                            @can('view user')
+                                <li class="{{ request()->is('dashboard/users*') ? 'active' : '' }}">
+                                    <a href="{{ route('users.index') }}" class="waves-effect"> Admin
+                                        {{-- <i class="mdi mdi-account-box-multiple-outline"></i> <span>Admin</span> --}}
+                                    </a>
+                                </li>
+                            @endcan
+                            {{-- <li><a href="#">Admin</a></li> --}}
                             <li><a href="#">Karyawan</a></li>
                         </ul>
                     </li>

@@ -15,7 +15,9 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->nullable()->constrained('users')->cascadeOnUpdate()->nullOnDelete();
             $table->string('no_invoice');
-            $table->date('periode_tagihan')->nullable();
+            $table->date('tanggal')->nullable();
+            $table->integer('bulan')->nullable();
+            $table->integer('tahun')->nullable();
             $table->string('paket')->nullable();
             $table->integer('tarif');
             $table->foreignId('admin')->nullable()->constrained('users')->cascadeOnUpdate()->nullOnDelete();

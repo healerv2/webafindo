@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controllers\Middleware;
 use App\Models\User;
 use App\Models\UserDetail;
+use App\Models\Area;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -20,7 +21,7 @@ class UserController extends Controller
         return [
 
             new Middleware('permission:view user', ['only' => ['index']]),
-            new Middleware('permission:create user', ['only' => ['create', 'store']]),
+            new Middleware('permission:create user', ['only' => ['create', 'store', 'createUserPenagihan']]),
             new Middleware('permission:update user', ['only' => ['update', 'edit']]),
             new Middleware('permission:delete user', ['only' => ['destroy']]),
         ];
@@ -82,14 +83,14 @@ class UserController extends Controller
             $request->validate([
                 'name' => 'required|string|max:255',
                 'email' => 'required|email|max:255|unique:users,email',
-                'password' => 'required|string|min:8|max:20',
+                //'password' => 'required|string|min:8|max:20',
                 'roles' => 'required'
             ]);
 
             $user = User::create([
                 'name' => $request->name,
                 'email' => $request->email,
-                'password' => Hash::make('P@5SW0rD'),
+                'password' => Hash::make('12345678'),
                 'foto'      => 'user.jpg',
             ]);
 
@@ -186,6 +187,51 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'Terjadi kesalahan sistem. code 500'
             ]);
+        }
+    }
+
+    public function createUserPenagihan()
+    {
+        $areas = Area::orderBy('nama_area')->get();
+        // $roles = Role::pluck('name', 'name')->all();
+
+        return view('user.penagihan', compact('areas'));
+    }
+
+    public function addUserPenagihan(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255|unique:users',
+            //'password' => 'required|string|min:8|confirmed',
+            'areas' => 'nullable|array',
+            'areas.*' => 'exists:areas,id',
+        ]);
+        try {
+            $user = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => Hash::make('12345678'),
+                'foto'      => 'user.jpg',
+            ]);
+
+            UserDetail::create([
+                'user_id' => $user->id,
+            ]);
+
+            $user->syncRoles('Penagihan');
+
+            if ($request->has('areas')) {
+                $user->areas()->attach($request->areas);
+            }
+
+            return redirect()->route('users.index')->with('message', 'User created successfully!');
+        } catch (\Throwable $th) {
+            //return redirect()->back()->with('error', 'Terjadi kesalahan sistem. code 500');
+            return redirect()->back()->with(
+                'error',
+                json_encode($th->getMessage(), true)
+            );
         }
     }
 }

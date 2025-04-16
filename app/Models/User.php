@@ -11,6 +11,7 @@ use Laravel\Jetstream\HasProfilePhoto;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -33,7 +34,8 @@ class User extends Authenticatable
         'email',
         'password',
         'status_users',
-        'foto'
+        'foto',
+        'username'
     ];
 
     /**
@@ -75,8 +77,8 @@ class User extends Authenticatable
         return $this->hasOne(UserDetail::class);
     }
 
-    // public function area(): HasOne
-    // {
-    //     return $this->hasOne(Area::class);
-    // }
+    public function areas(): BelongsToMany
+    {
+        return $this->belongsToMany(Area::class);
+    }
 }

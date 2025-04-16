@@ -10,6 +10,7 @@ use App\Models\Mikrotik;
 use App\Models\Area;
 use App\Models\DataPaket;
 use App\Models\Tagihan;
+use App\Models\PPN;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
@@ -194,8 +195,10 @@ class CustomerController extends Controller
         try {
             $customer = User::with('user_detail.user', 'user_detail.area', 'user_detail.mikrotik', 'user_detail.paket')->role('Customer')->findOrFail($id);
 
+            $ppn = PPN::first();
+
             //dd($customer);
-            return view('customer.detail', compact('customer'));
+            return view('customer.detail', compact('customer', 'ppn'));
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 404,
@@ -262,7 +265,6 @@ class CustomerController extends Controller
                     'by_tambahan_2' => $request->by_tambahan_2,
                     'keterangan_tambahan_2' => $request->keterangan_tambahan_2,
                     'diskon' => $request->diskon,
-                    //'total' => $request->total,
                     'tanggal_tagihan' => $request->tanggal_tagihan,
                     'alamat' => $request->alamat,
                     'latitude' => $request->latitude,
@@ -333,6 +335,21 @@ class CustomerController extends Controller
                 ]);
             }
 
+            // Default tahun ke tahun sekarang jika tidak ada
+            $tahun = $request->has('tahun') ? $request->tahun : date('Y');
+
+            // Membuat tanggal dari bulan dan tahun (tanggal 1)
+            $tanggal = Carbon::createFromDate($tahun, $request->bulan, 1)->format('Y-m-d');
+
+            $existingData = Tagihan::periode($request->bulan, $request->tahun)->first();
+
+            if ($existingData) {
+                return response()->json([
+                    'status' => 409,
+                    'message' => 'Data untuk periode ini sudah ada'
+                ]);
+            }
+
             $transaksi =  UserDetail::where('user_id', $request->id)->first();
 
             //dd($transaksi);
@@ -342,15 +359,14 @@ class CustomerController extends Controller
                 'by_tambahan_2' =>  $request->by_tambahan_2,
                 'diskon' =>  $request->diskon,
                 'total' =>  $request->tarif,
-                //'no_ref' => Uuid::uuid4(),
                 'updated_at' => Carbon::now(),
-                // 'tanggal_bayar' => Carbon::now()
             ]);
 
             Tagihan::create([
                 'user_id' => $request->id,
                 'no_invoice' => Uuid::uuid4(),
-                'periode_tagihan' => $request->layanan_id,
+                'tanggal' => $tanggal,
+                'bulan' => $request->bulan,
                 'paket' => $request->paket,
                 'tarif' => $request->tarif,
                 'admin' => auth()->id(),
@@ -359,6 +375,8 @@ class CustomerController extends Controller
 
             ]);
 
+            // dd($request->all());
+
             return response()->json([
                 'status' => 200,
                 'message' => 'pembayaran tunai berhasil!',
@@ -366,14 +384,14 @@ class CustomerController extends Controller
 
             ]);
         } catch (\Throwable $e) {
-            // return response()->json([
-            //     'status' => 500,
-            //     'message' => 'Terjadi kesalahan: ' . $e->getMessage()
-            // ], 500);
             return response()->json([
                 'status' => 500,
-                'message' => 'Terjadi kesalahan sistem. 500'
-            ]);
+                'message' => 'Terjadi kesalahan: ' . $e->getMessage()
+            ], 500);
+            // return response()->json([
+            //     'status' => 500,
+            //     'message' => 'Terjadi kesalahan sistem. 500'
+            // ]);
         }
     }
 
@@ -388,30 +406,43 @@ class CustomerController extends Controller
             ]);
         }
 
+
+        // Default tahun ke tahun sekarang jika tidak ada
+        $tahun = $request->has('tahun') ? $request->tahun : date('Y');
+
+        // Membuat tanggal dari bulan dan tahun (tanggal 1)
+        $tanggal = Carbon::createFromDate($tahun, $request->bulan, 1)->format('Y-m-d');
+
+        $existingData = Tagihan::periode($request->bulan, $request->tahun)->first();
+
+        if ($existingData) {
+            return response()->json([
+                'status' => 409,
+                'message' => 'Data untuk periode ini sudah ada'
+            ]);
+        }
+
         $transaksi =  UserDetail::where('user_id', $request->id)->first();
-        //dd($transaksi);
 
         $transaksi->update([
             'by_tambahan_1' =>  $request->by_tambahan_1,
             'by_tambahan_2' =>  $request->by_tambahan_2,
             'diskon' =>  $request->diskon,
             'total' =>  $request->tarif,
-            //'no_ref' => Uuid::uuid4(),
             'updated_at' => Carbon::now(),
-            // 'tanggal_bayar' => Carbon::now()
         ]);
 
         $apiInstance = new InvoiceApi();
         $invoice =  new CreateInvoiceRequest([
             'external_id' => (string) Uuid::uuid4(),
             'amount' => $request->tarif,
-            'invoice_duration' => 86400,
+            'invoice_duration' => 900,
             'customer' => [
                 'given_names' => $request->name,
                 'email' => $request->email,
                 'mobile_number' => $request->nohp,
             ],
-            'success_redirect_url' => route('dashboard'),
+            'success_redirect_url' => route('customer.show', $request->id),
             'failure_redirect_url' => route('dashboard'),
         ]);
 
@@ -420,7 +451,8 @@ class CustomerController extends Controller
             Tagihan::create([
                 'user_id' => $request->id,
                 'no_invoice' => $invoice['external_id'],
-                'periode_tagihan' => $request->layanan_id,
+                'tanggal' => $tanggal,
+                'bulan' => $request->bulan,
                 'paket' => $request->paket,
                 'tarif' => $invoice['amount'],
                 'invoice_url' => $result['invoice_url'],
@@ -431,17 +463,16 @@ class CustomerController extends Controller
             ]);
 
             return redirect($result['invoice_url']);
-            //print_r($result);
-        } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 500,
-                'message' => 'Terjadi kesalahan sistem. 500'
-            ]);
+            // } catch (\Throwable $e) {
+            //     return response()->json([
+            //         'status' => 500,
+            //         'message' => 'Terjadi kesalahan sistem. 500'
+            //     ]);
+            // }
+        } catch (\Xendit\XenditSdkException $e) {
+            echo 'Exception when calling InvoiceApi->createInvoice: ', $e->getMessage(), PHP_EOL;
+            echo 'Full Error: ', json_encode($e->getFullError()), PHP_EOL;
         }
-        // } catch (\Xendit\XenditSdkException $e) {
-        //     echo 'Exception when calling InvoiceApi->createInvoice: ', $e->getMessage(), PHP_EOL;
-        //     echo 'Full Error: ', json_encode($e->getFullError()), PHP_EOL;
-        // }
     }
 
     public function handleCallback(Request $request)
@@ -481,20 +512,23 @@ class CustomerController extends Controller
     {
         //
         if ($request->ajax()) {
+
+            //$user_id = $id;
+
+            //$user_id = $request->id;
+            // $user = User::findOrFail($user_id);
             $data =  Tagihan::with('user', 'admin')->orderBy('id', 'desc')->get();
             $user = auth()->user();
             return datatables()
                 ->of($data)
                 ->addIndexColumn()
                 ->addColumn('tagihan', function ($data) {
-                    $tanggal_tagihan = $data->periode_tagihan;
+                    $tanggal_tagihan = Carbon::parse($data->tanggal)->format('F Y');
                     $tanggal_bayar = tanggal_indonesia($data->created_at, false) ?? 'Data belum lengkap';
 
                     return '
-                        <a href="javascript:void(0)" class="text-info">
-                           ' . $tanggal_tagihan . '
-                        </a>
-                        <br>
+                    <h7 class="title py-3 m-0 text-success text-uppercase ">' . $tanggal_tagihan . '</h7>
+                    <p>
                         ' . $tanggal_bayar . '
                     ';
                 })

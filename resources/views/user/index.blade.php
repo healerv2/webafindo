@@ -19,6 +19,10 @@
                             <i class="fa fa-plus-circle"></i>
                             Tambah
                         </a>
+                        <a href="{{ route('users.penagihan') }}" class="btn btn-success btn-sm">
+                            <i class="fa fa-plus-circle"></i>
+                            Tambah Penagihan
+                        </a>
                     @endcan
                     <p></p>
                     <div class="table-responsive">

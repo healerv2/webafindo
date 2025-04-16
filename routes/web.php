@@ -13,6 +13,7 @@ use App\Http\Controllers\{
     AreaController,
     MikrotikController,
     CustomerController,
+    TugasTeknisiController,
 };
 
 Route::get('/', function () {
@@ -34,10 +35,13 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::resource('/permissions', PermissionController::class);
         //Users
         Route::resource('/users', UserController::class);
+        Route::get('/user/penagihan', [UserController::class, 'createUserPenagihan'])->name('users.penagihan');
+        Route::post('/user/penagihan/add', [UserController::class, 'addUserPenagihan'])->name('users.penagihan_add');
         //Users
         Route::resource('/profile', ProfileController::class);
         Route::post('/profile/update/profile', [ProfileController::class, 'updateProfile'])->name('profile.update_profile');
         Route::post('/profile/update-password', [ProfileController::class, 'updatePassword'])->name('profile.password_update');
+        Route::post('/profile/update-ppn/{id}', [ProfileController::class, 'updatePPN'])->name('profile.ppn_update');
         //Data paket
         Route::resource('/data-paket', DataPaketController::class);
         //Data area
@@ -50,6 +54,12 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::get('/get-tagihan/customer/{id}', [CustomerController::class, 'getTagihan'])->name('customer.get_tagihan');
         Route::post('/pay-tunai-tagihan/customer/{id}', [CustomerController::class, 'payTunaiTagihan'])->name('customer.pay_tunai_tagihan');
         Route::post('/pay-xendit-tagihan/customer', [CustomerController::class, 'payTagihanXendit'])->name('customer.pay_xendit_tagihan');
-        Route::get('/get-pembayaran/customer', [CustomerController::class, 'viewHistoryPembayaranAdmin'])->name('customer.get_pembayaran_admin');
+        Route::get('/get-pembayaran/customer/', [CustomerController::class, 'viewHistoryPembayaranAdmin'])->name('customer.get_pembayaran_admin');
+        //Tugas Teknisi
+        Route::resource('/tugas-teknisi', TugasTeknisiController::class);
+        Route::get('/teknisi/get-all', [TugasTeknisiController::class, 'getAllTeknisi']);
+        Route::get('/teknisi/{id}', [TugasTeknisiController::class, 'getTeknisiById']);
+        Route::get('/customers/get-all', [TugasTeknisiController::class, 'getAllCustomers']);
+        Route::get('/customers/{id}', [TugasTeknisiController::class, 'getCustomerById']);
     });
 });

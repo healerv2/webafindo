@@ -44,6 +44,7 @@ class UserRolePermissionSeeder extends Seeder
         Permission::create(['name' => 'delete data area']);
 
         Permission::create(['name' => 'view manage pelanggan']);
+        Permission::create(['name' => 'view manage karyawan']);
 
         Permission::create(['name' => 'view mikrotik']);
         Permission::create(['name' => 'create mikrotik']);
@@ -57,7 +58,7 @@ class UserRolePermissionSeeder extends Seeder
 
         // Create Roles
         $superAdminRole = Role::create(['name' => 'super-admin']); //as super-admin
-        $adminRole = Role::create(['name' => 'admin']);
+        $adminRole = Role::create(['name' => 'Teknisi']);
         $staffRole = Role::create(['name' => 'Customer']);
         //$userRole = Role::create(['name' => 'Customer']);
 

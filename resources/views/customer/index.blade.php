@@ -205,7 +205,7 @@
                                         <label for="mikrotik" class="form-label">Mikrotik</label>
                                         <select name="mikrotik_id" id="edit_customer_mikrotik" class="form-control"
                                             required>
-                                            <option value="">Pilih Mikrotik</option>
+                                            <option value="">-- Pilih Mikrotik --</option>
                                             @foreach ($mikrotik as $key => $item)
                                                 <option value="{{ $key }}">{{ $item }}</option>
                                             @endforeach

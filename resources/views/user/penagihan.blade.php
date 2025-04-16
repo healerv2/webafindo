@@ -1,12 +1,12 @@
 @extends('layouts.master')
 
 @section('title')
-    Tambah Users
+    Tambah Users Penagihan
 @endsection
 
 @section('breadcrumb')
     @parent
-    <li class="breadcrumb-item active"> Tambah Users</li>
+    <li class="breadcrumb-item active"> Tambah Penagihan</li>
 @endsection
 
 @section('content')
@@ -21,7 +21,7 @@
             @endif
             <div class="card">
                 <div class="card-body">
-                    <form class="custom-validation" action="{{ route('users.store') }}" method="POST">
+                    <form class="custom-validation" action="{{ route('users.penagihan_add') }}" method="POST">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Nama</label>
@@ -35,19 +35,14 @@
                                     placeholder="Email" />
                             </div>
                         </div>
-                        {{-- <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <input type="password" name="password" id="password" class="form-control" required
-                                placeholder="Password" />
-                        </div> --}}
                         <div class="mb-3">
-                            <label class="form-label">Role</label>
-                            <select name="roles[]" class="form-select" multiple>
-                                <option value="">Select Role</option>
-                                @foreach ($roles as $role)
-                                    <option value="{{ $role }}">{{ $role }}</option>
+                            <label for="areas" class="form-label">Areas</label>
+                            <select class="select2 mb-3 select2-multiple" id="areas" name="areas[]" multiple>
+                                @foreach ($areas as $area)
+                                    <option value="{{ $area->id }}">{{ $area->nama_area }} </option>
                                 @endforeach
                             </select>
+                            <small class="form-text text-muted">You can select multiple areas for this user</small>
                         </div>
                         <div class="mb-0">
                             <div>

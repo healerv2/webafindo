@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Hash;
+use App\Models\PPN;
 
 class ProfileController extends Controller
 {
@@ -12,7 +13,9 @@ class ProfileController extends Controller
     public function index()
     {
         $user = auth()->user();
-        return view('profile.index', compact('user'));
+        $ppn = PPN::first();
+
+        return view('profile.index', compact('user', 'ppn'));
     }
 
     public function updateProfile(Request $request)
@@ -96,6 +99,26 @@ class ProfileController extends Controller
                 'status' => 'error',
                 'message' => 'Gagal mengubah password: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    public function updatePPN(Request $request, string $id)
+    {
+        try {
+            $ppn = PPN::findOrFail($id);
+            $ppn->update([
+                'ppn' => $request->ppn,
+            ]);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'PPN berhasil diperbarui'
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'status' => 404,
+                'message' => 'PPN tidak ditemukan'
+            ]);
         }
     }
 }

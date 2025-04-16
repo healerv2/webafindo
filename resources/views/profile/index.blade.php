@@ -67,6 +67,10 @@
                             <a class="nav-link pb-3 pt-0" data-bs-toggle="tab" href="#password" role="tab"><i
                                     class="fas fa-key me-2"></i>Update Password</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link pb-3 pt-0" data-bs-toggle="tab" href="#ppn" role="tab"><i
+                                    class="fas fa-key me-2"></i>PPN</a>
+                        </li>
                     </ul>
 
                     <!-- Tab panes -->
@@ -338,6 +342,38 @@
                                                         <button type="submit"
                                                             class="btn btn-primary waves-effect waves-light">
                                                             Ubah Password
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </form>
+                                            <!-- end form -->
+                                        </div>
+                                    </div>
+                                    <!-- end card -->
+                                </div>
+                            </div>
+                            <!-- end row -->
+                        </div>
+                        <!-- Profile -->
+                        <div class="tab-pane" id="ppn" role="tabpanel">
+                            <div class="row">
+                                <div class="col-xl-12">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h5 class="card-title">PPN</h5>
+                                            <form id="PPNForm">
+                                                @csrf
+                                                <input type="hidden" id="ppn_id" value="{{ $ppn->id }}">
+                                                <div class="mb-3">
+                                                    <label class="form-label">PPN</label>
+                                                    <input type="number" class="form-control" id="ppn"
+                                                        name="ppn" value="{{ $ppn->ppn ?? 0 }}" required>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <div>
+                                                        <button type="submit"
+                                                            class="btn btn-primary waves-effect waves-light">
+                                                            Update PPN
                                                         </button>
                                                     </div>
                                                 </div>
@@ -796,6 +832,52 @@
                                 icon: 'error',
                                 title: 'Gagal',
                                 text: xhr.responseJSON.message
+                            });
+                        } else {
+                            // Error server
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: 'Terjadi kesalahan. Silakan coba lagi.'
+                            });
+                        }
+                    }
+                });
+            });
+            //PPN
+            $('#PPNForm').on('submit', function(e) {
+                e.preventDefault();
+                var id = $('#ppn_id').val();
+
+                $.ajax({
+                    url: "/dashboard/profile/update-ppn/" + id,
+                    method: 'POST',
+                    data: $(this).serialize(),
+                    success: function(response) {
+                        if (response.status === 200) {
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'Berhasil!',
+                                text: response.message,
+                                showConfirmButton: true,
+                                timer: 1500
+                            });
+                        }
+                    },
+                    error: function(xhr) {
+                        if (xhr.status === 422) {
+                            // Validasi error
+                            let errors = xhr.responseJSON.errors;
+                            let errorMessage = '';
+
+                            $.each(errors, function(field, messages) {
+                                errorMessage += messages[0] + '\n';
+                            });
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validasi Gagal',
+                                text: errorMessage
                             });
                         } else {
                             // Error server

@@ -43,7 +43,7 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title align-self-center" id="myModalLabel">
-                                    Tugas Tekisi</h5>
+                                    Tugas Teknisi</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"
                                     aria-label="Close"></button>
                             </div>

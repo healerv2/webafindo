@@ -371,6 +371,7 @@ class CustomerController extends Controller
                 'tarif' => $request->tarif,
                 'admin' => auth()->id(),
                 'status' => 'PAID',
+                'tipe_tagihan' => 'TUNAI',
                 'note' => 'Pembayaran Tunai',
 
             ]);
@@ -458,6 +459,7 @@ class CustomerController extends Controller
                 'invoice_url' => $result['invoice_url'],
                 'admin' => auth()->id(),
                 'status' => 'UNPAID',
+                'tipe_tagihan' => 'ONLINE',
                 'note' => 'Pembayaran Dengan Xendit',
 
             ]);

@@ -13,27 +13,6 @@
                         <i class="mdi mdi-speedometer"></i> <span>Dashboard</span>
                     </a>
                 </li>
-                @can('view role')
-                    <li class="{{ request()->is('dashboard/roles*') ? 'active' : '' }}">
-                        <a href="{{ route('roles.index') }}" class="waves-effect">
-                            <i class="mdi mdi-format-list-bulleted"></i> <span>Role</span>
-                        </a>
-                    </li>
-                @endcan
-                @can('view permission')
-                    <li class="{{ request()->is('dashboard/permissions*') ? 'active' : '' }}">
-                        <a href="{{ route('permissions.index') }}" class="waves-effect">
-                            <i class="mdi mdi-format-list-bulleted"></i> <span>Permissions</span>
-                        </a>
-                    </li>
-                @endcan
-                {{-- @can('view user')
-                    <li class="{{ request()->is('dashboard/users*') ? 'active' : '' }}">
-                        <a href="{{ route('users.index') }}" class="waves-effect">
-                            <i class="mdi mdi-account-box-multiple-outline"></i> <span>User</span>
-                        </a>
-                    </li>
-                @endcan --}}
                 @can('view manage pelanggan')
                     <li>
                         <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -71,8 +50,39 @@
                                     </a>
                                 </li>
                             @endcan
+                            @can('view role')
+                                <li class="{{ request()->is('dashboard/roles*') ? 'active' : '' }}">
+                                    <a href="{{ route('roles.index') }}" class="waves-effect">
+                                        <span>Role</span>
+                                    </a>
+                                </li>
+                            @endcan
+                            @can('view permission')
+                                <li class="{{ request()->is('dashboard/permissions*') ? 'active' : '' }}">
+                                    <a href="{{ route('permissions.index') }}" class="waves-effect">
+                                        <span>Permissions</span>
+                                    </a>
+                                </li>
+                            @endcan
                             {{-- <li><a href="#">Admin</a></li> --}}
                             <li><a href="#">Karyawan</a></li>
+                        </ul>
+                    </li>
+                @endcan
+                @can('view manage pembukuan')
+                    <li>
+                        <a href="javascript: void(0);" class="has-arrow waves-effect">
+                            <i class="mdi mdi-account-box-multiple-outline"></i>
+                            <span>Manage Pembukuan</span>
+                        </a>
+                        <ul class="sub-menu" aria-expanded="false">
+                            @can('view pembukuan')
+                                <li>
+                                    <a href="{{ route('pembukuan.index') }}" class="waves-effect">
+                                        <span>Pembukuan</span>
+                                    </a>
+                                </li>
+                            @endcan
                         </ul>
                     </li>
                 @endcan

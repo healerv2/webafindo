@@ -14,6 +14,7 @@ use App\Http\Controllers\{
     MikrotikController,
     CustomerController,
     TugasTeknisiController,
+    PembukuanController,
 };
 
 Route::get('/', function () {
@@ -61,5 +62,25 @@ Route::group(['middleware' => ['auth',]], function () {
         Route::get('/teknisi/{id}', [TugasTeknisiController::class, 'getTeknisiById']);
         Route::get('/customers/get-all', [TugasTeknisiController::class, 'getAllCustomers']);
         Route::get('/customers/{id}', [TugasTeknisiController::class, 'getCustomerById']);
+        //Pembukuan
+        Route::resource('/pembukuan', PembukuanController::class);
+        Route::get('/pembukuans/get-gaji/view', [PembukuanController::class, 'getPengeluaranGajiView'])->name('pembukuan.get_gaji_view');
+        Route::get('/pembukuans/get-gaji', [PembukuanController::class, 'getPengeluaranGaji'])->name('pembukuan.get_gaji');
+        Route::get('/pembukuans/get-perbaikan-alat/view', [PembukuanController::class, 'getPengeluaranPerbaikanAlatView'])->name('pembukuan.perbaikan_alat_view');
+        Route::get('/pembukuans/get-perbaikan-alat', [PembukuanController::class, 'getPengeluaranPerbaikanAlat'])->name('pembukuan.perbaikan_alat');
+        Route::get('/pembukuans/get-pasang-baru/view', [PembukuanController::class, 'getPengeluaranPasangBaruView'])->name('pembukuan.pasang_baru_view');
+        Route::get('/pembukuans/get-pasang-baru', [PembukuanController::class, 'getPengeluaranPasangBaru'])->name('pembukuan.pasang_baru');
+        Route::get('/pembukuans/get-bandwith/view', [PembukuanController::class, 'getPengeluaranBandwithView'])->name('pembukuan.bandwith_view');
+        Route::get('/pembukuans/get-bandwith', [PembukuanController::class, 'getPengeluaranBandwith'])->name('pembukuan.bandwith');
+        Route::get('/pembukuans/get-penagihan/view', [PembukuanController::class, 'getPengeluaranBandwithView'])->name('pembukuan.penagihan_view');
+        Route::get('/pembukuans/get-penagihan', [PembukuanController::class, 'getPengeluaranBandwith'])->name('pembukuan.penagihan');
+        Route::get('/pembukuans/get-listrik-pdam-pulsa/view', [PembukuanController::class, 'getPengeluaranListrikPDAMPulsaView'])->name('pembukuan.lisrik_pdam_pulsa_view');
+        Route::get('/pembukuans/get-listrik-pdam-pulsa', [PembukuanController::class, 'getPengeluaranListrikPDAMPulsa'])->name('pembukuan.lisrik_pdam_pulsa');
+        Route::get('/pembukuans/get-marketing/view', [PembukuanController::class, 'getPengeluaranMarketingView'])->name('pembukuan.marketing_view');
+        Route::get('/pembukuans/get-marketing', [PembukuanController::class, 'getPengeluaranMarketing'])->name('pembukuan.marketing');
+        Route::get('/pembukuans/get-lainnya/view', [PembukuanController::class, 'getPengeluaranLainnyaView'])->name('pembukuan.lainnya_view');
+        Route::get('/pembukuans/get-lainnya', [PembukuanController::class, 'getPengeluaranLainnya'])->name('pembukuan.lainnya');
+        Route::get('/pembukuans/get-pemasukan-lainnya/view', [PembukuanController::class, 'getPemasukanLainnyaView'])->name('pembukuan.pemasukan_lainnya_view');
+        Route::get('/pembukuans/get-pemasukan-lainnya', [PembukuanController::class, 'getPemasukanLainnya'])->name('pembukuan.pemasukan_lainnya');
     });
 });

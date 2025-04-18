@@ -20,7 +20,8 @@ class DatabaseSeeder extends Seeder
             SettingsSeeder::class,
             AreaSeeder::class,
             PaketSeeder::class,
-            MikrotikSeeder::class
+            MikrotikSeeder::class,
+            PPNSeeder::class
         ]);
     }
 }

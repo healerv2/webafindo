@@ -49,6 +49,8 @@
                                     <span class="error tipe_error"></span>
                                 </div>
 
+                                <input type="hidden" id="admin" name="admin" value="{{ Auth::id() }}">
+
                                 <!-- Form Pengeluaran (awalnya disembunyikan) -->
                                 <div id="form-pengeluaran" style="display: none;">
                                     <div class="mb-3">
@@ -70,12 +72,12 @@
                                 <!-- Form Setoran (awalnya disembunyikan) -->
                                 <div id="form-setoran" style="display: none;">
                                     <div class="mb-3">
-                                        <label for="rekening_tujuan" class="form-label">Rekening Tujuan</label>
-                                        <select class="form-select" id="rekening_tujuan" name="rekening_tujuan">
-                                            <option value="">-- Pilih Rekening --</option>
-                                            <option value="bca">BCA</option>
-                                            <option value="bri">BRI</option>
-                                            <option value="mandiri">Mandiri</option>
+                                        <label for="tagih" class="form-label">Penagihan</label>
+                                        <select class="form-select" id="tagih" name="tagih">
+                                            <option value="">-- Pilih Penagihan --</option>
+                                            @foreach ($tagih as $t)
+                                                <option value="{{ $t->id }}">{{ $t->name }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
@@ -296,6 +298,46 @@
             const tipePembukuan = document.getElementById('tipe_pembukuan');
             const formPengeluaran = document.getElementById('form-pengeluaran');
             const formSetoran = document.getElementById('form-setoran');
+            const adminInput = document.getElementById('admin');
+            const authId = "{{ Auth::id() }}"; // ID dari user yang sedang login
+
+            // Menambahkan event listener untuk perubahan pada select
+            tipePembukuan.addEventListener('change', function() {
+                // Menyembunyikan semua form khusus terlebih dahulu
+                formPengeluaran.style.display = 'none';
+                formSetoran.style.display = 'none';
+
+                // Reset admin ID ke default (auth ID)
+                adminInput.value = authId;
+
+                // Menampilkan form yang sesuai berdasarkan pilihan
+                if (this.value === 'pengeluaran') {
+                    formPengeluaran.style.display = 'block';
+                } else if (this.value === 'setoran') {
+                    formSetoran.style.display = 'block';
+                }
+            });
+
+            // Mendapatkan elemen select penagihan
+            const tagihSelect = document.getElementById('tagih');
+            if (tagihSelect) {
+                tagihSelect.addEventListener('change', function() {
+                    // Update nilai admin dengan ID penagih saat dipilih
+                    if (this.value) {
+                        adminInput.value = this.value;
+                    } else {
+                        adminInput.value = authId; // Reset jika tidak dipilih
+                    }
+                });
+            }
+        });
+    </script>
+    {{-- <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mendapatkan elemen select tipe pembukuan
+            const tipePembukuan = document.getElementById('tipe_pembukuan');
+            const formPengeluaran = document.getElementById('form-pengeluaran');
+            const formSetoran = document.getElementById('form-setoran');
 
             // Menambahkan event listener untuk perubahan pada select
             tipePembukuan.addEventListener('change', function() {
@@ -311,8 +353,27 @@
                 }
             });
         });
-    </script>
+    </script> --}}
     <script>
+        function resetModalState() {
+            // Hapus modal dan backdrop
+            $('.modal').modal('hide');
+
+            // Tunggu proses modal hide selesai
+            setTimeout(function() {
+                // Hapus class modal-open dan backdrop
+                $('body').removeClass('modal-open');
+                $('.modal-backdrop').remove();
+
+                // Kembalikan overflow style ke auto/visible
+                $('body').css('overflow', 'auto');
+                $('body').css('padding-right', '');
+
+                // Untuk Bootstrap 5, pastikan tidak ada style inline yang tersisa
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+            }, 200);
+        }
         $(document).ready(function() {
             $.ajaxSetup({
                 headers: {

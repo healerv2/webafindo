@@ -7,6 +7,7 @@ use Illuminate\Routing\Controllers\Middleware;
 use App\Models\Pembukuan;
 use App\Models\Tagihan;
 use Carbon\Carbon;
+use App\Models\User;
 
 class PembukuanController extends Controller
 {
@@ -28,10 +29,13 @@ class PembukuanController extends Controller
     public function index()
     {
         //
+        $tagih = User::role('Penagihan')->get();
         //Pemasukan
         $total_transaksi_cash = Tagihan::where('tipe_tagihan', 'TUNAI')->sum('tarif');
         $total_transaksi_online = Tagihan::where('tipe_tagihan', 'ONLINE')->sum('tarif');
-        $total_transaksi_lainnya = Pembukuan::where('tipe_pembukuan', 'pemasukan')->where('kategori_pembukuan', 'lain-lain')->sum('jumlah');
+        $total_transaksi_lainnya1 = Pembukuan::where('tipe_pembukuan', 'setoran')->where('kategori_pembukuan', 'lain-lain')->sum('jumlah');
+        $total_transaksi_lainnya2 = Pembukuan::where('tipe_pembukuan', 'pemasukan')->where('kategori_pembukuan', 'lain-lain')->sum('jumlah');
+        $total_transaksi_lainnya = $total_transaksi_lainnya1 + $total_transaksi_lainnya2;
         $total_pemasukan = $total_transaksi_cash + $total_transaksi_online + $total_transaksi_lainnya;
         //Pengeluaran
         $total_pengeluaran_lisrtik_pdam_pulsa = Pembukuan::where('tipe_pembukuan', 'pengeluaran')->where('kategori_pembukuan', 'listrik-PDAM-pulsa')->sum('jumlah');
@@ -48,7 +52,7 @@ class PembukuanController extends Controller
 
         $total_pendapatan = $total_pemasukan - $total_pengeluaran;
 
-        return view('pembukuan.index', compact('total_pemasukan', 'total_pengeluaran', 'total_pendapatan', 'total_transaksi_cash', 'total_transaksi_online', 'total_transaksi_lainnya', 'total_pengeluaran_lisrtik_pdam_pulsa', 'total_pengeluaran_gaji', 'total_pengeluaran_pasang_baru', 'total_pengeluaran_perbaikan_alat', 'total_pengeluaran_bandwith', 'total_pengeluaran_penagihan', 'total_pengeluaran_marketing', 'total_pengeluaran_lainnya'));
+        return view('pembukuan.index', compact('tagih', 'total_pemasukan', 'total_pengeluaran', 'total_pendapatan', 'total_transaksi_cash', 'total_transaksi_online', 'total_transaksi_lainnya', 'total_pengeluaran_lisrtik_pdam_pulsa', 'total_pengeluaran_gaji', 'total_pengeluaran_pasang_baru', 'total_pengeluaran_perbaikan_alat', 'total_pengeluaran_bandwith', 'total_pengeluaran_penagihan', 'total_pengeluaran_marketing', 'total_pengeluaran_lainnya'));
     }
 
 
@@ -64,8 +68,9 @@ class PembukuanController extends Controller
         if ($request->ajax()) {
             try {
                 $data = Pembukuan::with('admin')
-                    ->where('tipe_pembukuan', 'pemasukan')
-                    ->where('kategori_pembukuan', 'lain-lain')
+                    ->orWhere('tipe_pembukuan', 'pemasukan')
+                    ->orWhere('tipe_pembukuan', 'setoran')
+                    ->orWhere('kategori_pembukuan', 'lain-lain')
                     ->get();
 
                 return datatables()
@@ -360,15 +365,17 @@ class PembukuanController extends Controller
             $pembukuan->keterangan = $request->keterangan;
             $pembukuan->jumlah = $request->jumlah;
             $pembukuan->tipe_pembukuan = $request->tipe_pembukuan;
+            $pembukuan->admin = $request->admin;
             if ($request->tipe_pembukuan == 'pemasukan') {
                 $pembukuan->kategori_pembukuan = 'lain-lain';
             } elseif ($request->tipe_pembukuan == 'pengeluaran') {
                 $pembukuan->kategori_pembukuan = $request->kategori_pengeluaran;
             } elseif ($request->tipe_pembukuan == 'setoran') {
-                $pembukuan->kategori_pembukuan = 'Setoran';
+                $pembukuan->kategori_pembukuan = 'lain-lain';
             }
+
             $pembukuan->tanggal = Carbon::now();
-            $pembukuan->admin = auth()->id();
+            // $pembukuan->admin = auth()->id();
 
             $pembukuan->save();
 
